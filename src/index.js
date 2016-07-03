@@ -96,7 +96,7 @@ Ravelry.prototype.authorize = function (req, res, next) {
       // that._access_secret is set
       that.currentUser(function (err, user) {
         if (err) return err;
-        that.user = user;
+        Object.assign(that, user); //add user result to "this" object
         res.writeHead(302, {'Location': that._responseUrl});
         res.end();
       });
