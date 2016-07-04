@@ -1,2 +1,3 @@
 .jshintrc
 backlog.txt
+node_modules/
