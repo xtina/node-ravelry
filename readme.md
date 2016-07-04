@@ -70,8 +70,9 @@ The methods (with a few exceptions) are named the same way as the endpoint title
 When the endpoint requires them, arguments must be supplied in the below order. If an argument is not necessary it may be omitted.
 
 ```
-rav.someMethod(username, id, params, callback);
+rav.someMethod(session, username, id, params, callback);
 ```
+- **session** - REQUIRED. access through req.session.
 
 - **username** - (type: String) If the request is for the authenticated user, this argument may be omitted. Request for other users' information is only available for GET requests. Ex: `rav.favorites.list('sfrieson')`
 
