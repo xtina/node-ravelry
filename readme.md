@@ -37,10 +37,10 @@ app.get('/auth', function(req, res) { //visiting localhost:3000/auth will trigge
       res.writeHead(302, {'Location': url} );
       res.end();
     });
-  });
+});
 
-  //After the user successfully logged in they are sent here with their the OAuth verifier
-  app.get('/callback', function(req, res) {
+//After the user successfully logged in they are sent here with their the OAuth verifier
+app.get('/callback', function(req, res) {
     //Finish authentication of app. You will receive the user's info. You can access the authenticated API routes now.
     rav.authorize(req, res);
 });
