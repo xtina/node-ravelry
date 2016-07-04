@@ -13,7 +13,6 @@ module.exports = function (that) {
     },
     list: function (session, username, params, cb) {
       // list([username, params, cb])
-      console.log(session);
       return common.getUserParams(session, '/people/', '/favorites/list.json', username, params, cb);
     },
     show: function (username, id, cb) {

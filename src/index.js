@@ -125,9 +125,7 @@ Ravelry.prototype._get = function (session, endpoint, params, cb) {
     cb = params;
     params = '';
   }
-  console.log("tokens");
-  console.log(session.oauthAccessToken);
-  console.log(session.oauthAccessTokenSecret);
+
   this._oauth.get(this._reqUrl(session, endpoint, params), session.oauthAccessToken, session.oauthAccessTokenSecret,
   function (err, data, response) {
     if (err) {
