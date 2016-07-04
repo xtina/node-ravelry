@@ -48,7 +48,7 @@ app.get('/callback', function(req, res) {
 app.get('/profile', function(req,res) {
   res.writeHead(200, 'application/json');
   res.end(JSON.stringify(req.session.user) || '{"user": "undefined"}');
-  });
+});
 ```
 
 --------------------------------------------------------------------------------
