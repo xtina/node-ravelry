@@ -82,55 +82,54 @@ Ravelry.prototype.signInUrl = function (cb) {
   );
 };
 
-Ravelry.prototype.authorize = function (req, res, next) {
-  console.log('req url:', req.url);
-  if (req.url.match('oauth_verifier=') && this._responseUrl) {
-    console.log('Authorizing');
-    var that = this;
-    var queries = require('url').parse(req.url, true).query;
+Ravelry.prototype.authorize = function(req, res, next) {
+    if (req.url.match('oauth_verifier=') && this._responseUrl) {
+        console.log('Authorizing...');
+        var that = this;
+        var session = req.session;
+        var queries = require('url').parse(req.url, true).query;
 
-    this._oauth_verifier = queries.oauth_verifier;
-    this.accessToken(function (err, data) {
-      if (err) return err;
-      // that._access_token is set
-      // that._access_secret is set
-      that.currentUser(function (err, user) {
-        if (err) return err;
-        Object.assign(that, user); //add user result to "this" object
-        res.writeHead(302, {'Location': that._responseUrl});
-        res.end();
-      });
-    });
-  } else if (next) next(); // for use in Express
+        this._oauth_verifier = queries.oauth_verifier;
+        this._oauth.getOAuthAccessToken(
+            this._oauth_token,
+            this._oauth_secret,
+            this._oauth_verifier,
+            function(err, oauthAccessToken, oauthAccessTokenSecret, results) {
+                if (err) return err;
+                //set accesss tokens on the session
+                session.oauthAccessToken = oauthAccessToken;
+                session.oauthAccessTokenSecret = oauthAccessTokenSecret;
+                var visibleSession = session;
+                that.currentUser(session, function(err, user) {
+                    if (err) return err;
+
+                    Object.assign(visibleSession, user); //add user result to session
+                    res.writeHead(302, {
+                        'Location': that._responseUrl
+                    });
+                    res.end();
+                });
+            });
+    } else if (next) next(); // for use in Express
 };
 
-Ravelry.prototype.accessToken = function (cb) {
-  var that = this;
-
-  this._oauth.getOAuthAccessToken(
-    this._oauth_token,
-    this._oauth_secret,
-    this._oauth_verifier,
-    function (err, oauthAccessToken, oauthAccessTokenSecret, results) {
-      that._access_token = oauthAccessToken;
-      that._access_secret = oauthAccessTokenSecret;
-      return cb(err, results);
-    }
-  );
-};
-
-Ravelry.prototype._reqUrl = function (endpoint, params) {
-  if (this.user) endpoint = endpoint.replace('_username_', this.user.username);
+Ravelry.prototype._reqUrl = function (session, endpoint, params) {
+  if (session.user) endpoint = endpoint.replace('_username_', session.user.username);
   if (!params) params = '';
+
   return u.urlBuilder('https://api.ravelry.com', endpoint, params);
 };
 
-Ravelry.prototype._get = function (endpoint, params, cb) {
+Ravelry.prototype._get = function (session, endpoint, params, cb) {
   if (typeof params === 'function') {
     cb = params;
     params = '';
   }
-  this._oauth.get(this._reqUrl(endpoint, params), this._access_token, this._access_secret, function (err, data, response) {
+  console.log("tokens");
+  console.log(session.oauthAccessToken);
+  console.log(session.oauthAccessTokenSecret);
+  this._oauth.get(this._reqUrl(session, endpoint, params), session.oauthAccessToken, session.oauthAccessTokenSecret,
+  function (err, data, response) {
     if (err) {
       cb(err);
     } else {

@@ -1,12 +1,12 @@
 module.exports = function (that) {
   return {
-    getUserIdParams: function (preUser, preId, postId, username, id, params, cb) {
+    getUserIdParams: function (session, preUser, preId, postId, username, id, params, cb) {
       if (username && typeof username !== 'string') {
         cb = params;
         params = id;
         id = username;
-        username = that.user.username;
-      } else if (!username) username = that.user && that.user.username ? that.user.username : ''; // User may not be logged in
+        username = session.user.username;
+      } else if (!username) username = session && session.user && session.user.username ? session.user.username : ''; // User may not be logged in
       if (id === -1) id = '';
       if (typeof params !== 'object') {
         cb = params;
@@ -16,7 +16,7 @@ module.exports = function (that) {
 
       var endpoint = preUser + username + preId + id + postId;
       var promise = new Promise(function (resolve, reject) {
-        that._get(endpoint, params, function (err, data) {
+        that._get(session, endpoint, params, function (err, data) {
           if (err) return reject(err);
           resolve(JSON.parse(data));
         });
@@ -30,31 +30,31 @@ module.exports = function (that) {
       }
       return promise;
     },
-    getUserParams: function (preUser, postUser, username, params, cb) {
+    getUserParams: function (session, preUser, postUser, username, params, cb) {
       if (username && typeof username !== 'string') {
         cb = params;
         params = username;
-        username = that.user.username;
-      } else if (!username) username = that.user && that.user.username ? that.user.username : ''; // User may not be logged in
+        username = session.user.username;
+      } else if (!username) username = session.user && session.user.username ? session.user.username : ''; // User may not be logged in
       if (params && typeof params !== 'object') {
         cb = params;
         params = {};
       } else if (!params) params = {};
-      return this.getUserIdParams(preUser, postUser, '', username, -1, params, cb);
+      return this.getUserIdParams(session, preUser, postUser, '', username, -1, params, cb);
     },
     getUserId: function (preUser, preId, postId, username, id, cb) {
       if (username && typeof username !== 'string') {
         cb = id;
         id = username;
-        username = that.user.username;
-      } else if (!username) username = that.user && that.user.username ? that.user.username : ''; // User may not be logged in
+        username = session.user.username;
+      } else if (!username) username = session.user && session.user.username ? session.user.username : ''; // User may not be logged in
       return this.getUserIdParams(preUser, preId, postId, username, id, null, cb);
     },
     getUser: function (preUser, postUser, username, cb) {
       if (username && typeof username !== 'string') {
         cb = username;
-        username = that.user.username;
-      } else if (!username) username = that.user && that.user.username ? that.user.username : ''; // User may not be logged in
+        username = session.user.username;
+      } else if (!username) username = session.user && session.user.username ? session.user.username : ''; // User may not be logged in
       return this.getUserIdParams(preUser, postUser, '', username, -1, {}, cb);
     },
     getParams: function (endpoint, params, cb) {
@@ -64,8 +64,8 @@ module.exports = function (that) {
       } else if (!params) params = {};
       return this.getUserIdParams(endpoint, '', '', '', -1, params, cb);
     },
-    get: function (endpoint, cb) {
-      return this.getUserIdParams(endpoint, '', '', '', -1, {}, cb);
+    get: function (session, endpoint, cb) {
+      return this.getUserIdParams(session, endpoint, '', '', '', -1, {}, cb);
     },
     postParams: function (endpoint, params, cb) {
       var promise = new Promise(function (resolve, reject) {
